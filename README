@@ -1,0 +1,4 @@
+fuse-http
+=========
+
+Making a remote HTTP server available as a filesystem.
