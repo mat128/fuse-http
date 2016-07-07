@@ -108,4 +108,4 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
 
-    fuse = FUSE(Loopback(argv[1]), argv[2], foreground=False)
+    fuse = FUSE(Loopback(argv[1]), argv[2], foreground=True)
