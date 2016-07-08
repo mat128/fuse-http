@@ -26,8 +26,12 @@ class HttpFilesystem(LoggingMixIn, Operations):
 
     def getattr(self, path, fh=None):
         response = requests.head(self.base_url + path)
+        if response.status_code == 301:
+            return self.getattr(response.headers['location'], fh)
+
         if response.status_code != 200:
             raise FuseOSError(ENOENT)
+
         size = int(response.headers['content-length'])
         try:
             mtime = mktime(strptime(response.headers['last-modified'],
