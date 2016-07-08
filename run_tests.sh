@@ -1,14 +1,19 @@
 #!/bin/bash -xe
 
 root="test/source"
-mountpoint="test/mountpoint"
-mkdir -p $mountpoint
+mountpoint="$(mktemp -d '/tmp/fuse-http-test.XXXXXXXX')"
 
-python loopback.py $root $mountpoint &
+python fuse-http.py "http://localhost:8000" $mountpoint &
 fuse_pid=$!
 
+cd $root
+python -m SimpleHTTPServer &
+httpd_pid=$!
+cd -
+
+trap "kill $fuse_pid $httpd_pid; sleep 0.5; rmdir $mountpoint" EXIT
+ 
 sleep 1
 
 test/test.sh $mountpoint
 
-kill $fuse_pid
