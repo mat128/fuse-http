@@ -1,13 +1,14 @@
 #!/bin/bash -xe
 
 root="test/source"
+httpd_path="../testHTTPServer.py" #relative to $root
 mountpoint="$(mktemp -d '/tmp/fuse-http-test.XXXXXXXX')"
 
 python fuse-http.py "http://localhost:8000" $mountpoint &
 fuse_pid=$!
 
 cd $root
-python -m SimpleHTTPServer &
+python $httpd_path &
 httpd_pid=$!
 cd -
 

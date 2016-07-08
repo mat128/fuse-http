@@ -19,13 +19,17 @@ class HttpFilesystem(LoggingMixIn, Operations):
     def __init__(self, base_url):
         self.base_url = base_url
         super(HttpFilesystem, self).__init__()
+        self.session = requests.Session()
 
     def read(self, path, size, offset, fh):
-        response = requests.get(self.base_url + path)
+        response = self.session.get(self.base_url + path)
         return response.content[offset:offset+size]
 
     def getattr(self, path, fh=None):
-        response = requests.head(self.base_url + path)
+        mtime = time()
+        if path.endswith('/'):
+            return dict(st_mode=(S_IFDIR | 0o755), st_ctime=mtime, st_mtime=mtime, st_atime=mtime, st_nlink=2)
+        response = self.session.head(self.base_url + path)
         if response.status_code == 301:
             return self.getattr(response.headers['location'], fh)
 
@@ -37,10 +41,7 @@ class HttpFilesystem(LoggingMixIn, Operations):
             mtime = mktime(strptime(response.headers['last-modified'],
                                     "%a, %d %b %Y %H:%M:%S GMT"))
         except KeyError:
-            mtime = time()
-
-        if path.endswith('/'):
-            return dict(st_mode=(S_IFDIR | 0o755), st_ctime=mtime, st_mtime=mtime, st_atime=mtime, st_nlink=2)
+            pass
 
         return dict(st_mode=(S_IFREG), st_nlink=1, st_size=size, st_ctime=mtime, st_mtime=mtime, st_atime=time())
 
