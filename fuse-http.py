@@ -2,26 +2,23 @@
 from __future__ import print_function, absolute_import, division
 
 import logging
-
-from collections import defaultdict
 from errno import ENOENT
-from stat import S_IFDIR, S_IFLNK, S_IFREG
-from sys import argv, exit
-from time import time, strftime, localtime, mktime, strptime
+from sys import argv
+from time import time, mktime, strptime
 
 from fuse import FUSE, FuseOSError, Operations, LoggingMixIn
+from stat import S_IFDIR, S_IFREG
 
 if not hasattr(__builtins__, 'bytes'):
     bytes = str
 
-
 import requests
 
 
-class HttpFilesystem(LoggingMixIn, Operations): #(Loopback):
+class HttpFilesystem(LoggingMixIn, Operations):
     def __init__(self, base_url):
       self.base_url = base_url
-      return super(HttpFilesystem, self).__init__()
+      super(HttpFilesystem, self).__init__()
 
     def read(self, path, size, offset, fh):
       response = requests.get(self.base_url + path)
